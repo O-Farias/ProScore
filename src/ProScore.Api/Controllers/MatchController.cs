@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProScore.Api.Data;
 using ProScore.Api.Models;
+using ProScore.Api.Services;
 
 namespace ProScore.Api.Controllers
 {
@@ -8,22 +8,18 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class MatchController : ControllerBase
     {
-        private readonly ProScoreContext _context;
+        private readonly MatchService _matchService;
 
-        public MatchController(ProScoreContext context)
+        public MatchController(MatchService matchService)
         {
-            _context = context;
+            _matchService = matchService;
         }
 
         // GET: api/Match
         [HttpGet]
         public IActionResult GetAllMatches()
         {
-            var matches = _context.Matches
-                .Include(m => m.HomeTeam)
-                .Include(m => m.AwayTeam)
-                .ToList();
-
+            var matches = _matchService.GetAllMatches();
             return Ok(matches);
         }
 
@@ -31,11 +27,7 @@ namespace ProScore.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetMatchById(int id)
         {
-            var match = _context.Matches
-                .Include(m => m.HomeTeam)
-                .Include(m => m.AwayTeam)
-                .FirstOrDefault(m => m.Id == id);
-
+            var match = _matchService.GetMatchById(id);
             if (match == null) return NotFound("Partida não encontrada.");
             return Ok(match);
         }
@@ -44,30 +36,23 @@ namespace ProScore.Api.Controllers
         [HttpPost]
         public IActionResult CreateMatch(Match match)
         {
-            var homeTeam = _context.Teams.Find(match.HomeTeamId);
-            var awayTeam = _context.Teams.Find(match.AwayTeamId);
-
-            if (homeTeam == null || awayTeam == null)
-                return BadRequest("Um ou ambos os times não foram encontrados.");
-
-            _context.Matches.Add(match);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetMatchById), new { id = match.Id }, match);
+            try
+            {
+                var createdMatch = _matchService.CreateMatch(match);
+                return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.Id }, createdMatch);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT: api/Match/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateMatch(int id, Match updatedMatch)
         {
-            var match = _context.Matches.Find(id);
-            if (match == null) return NotFound("Partida não encontrada.");
-
-            match.Date = updatedMatch.Date;
-            match.Location = updatedMatch.Location;
-            match.HomeTeamId = updatedMatch.HomeTeamId;
-            match.AwayTeamId = updatedMatch.AwayTeamId;
-
-            _context.SaveChanges();
+            var success = _matchService.UpdateMatch(id, updatedMatch);
+            if (!success) return NotFound("Partida não encontrada.");
             return NoContent();
         }
 
@@ -75,11 +60,8 @@ namespace ProScore.Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteMatch(int id)
         {
-            var match = _context.Matches.Find(id);
-            if (match == null) return NotFound("Partida não encontrada.");
-
-            _context.Matches.Remove(match);
-            _context.SaveChanges();
+            var success = _matchService.DeleteMatch(id);
+            if (!success) return NotFound("Partida não encontrada.");
             return NoContent();
         }
     }
