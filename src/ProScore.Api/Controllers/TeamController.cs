@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Controllers
 {

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Controllers
 {
@@ -20,6 +21,7 @@ namespace ProScore.Api.Controllers
         public IActionResult GetAllMatches()
         {
             var matches = _matchService.GetAllMatches();
+            if (matches == null || !matches.Any()) return NotFound("Nenhuma partida encontrada.");
             return Ok(matches);
         }
 
@@ -38,6 +40,8 @@ namespace ProScore.Api.Controllers
         {
             try
             {
+                if (match == null) return BadRequest("Dados da partida são inválidos.");
+
                 var createdMatch = _matchService.CreateMatch(match);
                 return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.Id }, createdMatch);
             }
@@ -51,6 +55,8 @@ namespace ProScore.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateMatch(int id, Match updatedMatch)
         {
+            if (updatedMatch == null) return BadRequest("Dados atualizados da partida são inválidos.");
+
             var success = _matchService.UpdateMatch(id, updatedMatch);
             if (!success) return NotFound("Partida não encontrada.");
             return NoContent();

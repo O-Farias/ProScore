@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
 
@@ -21,7 +22,7 @@ namespace ProScore.Api.Controllers
         {
             var events = _eventService.GetEventsByMatch(matchId);
 
-            if (!events.Any()) return NotFound("Nenhum evento encontrado para esta partida.");
+            if (events == null || !events.Any()) return NotFound("Nenhum evento encontrado para esta partida.");
             return Ok(events);
         }
 
@@ -31,6 +32,8 @@ namespace ProScore.Api.Controllers
         {
             try
             {
+                if (gameEvent == null) return BadRequest("Dados do evento são inválidos.");
+
                 var createdEvent = _eventService.CreateEvent(gameEvent);
                 return CreatedAtAction(nameof(GetEventsByMatch), new { matchId = createdEvent.MatchId }, createdEvent);
             }
@@ -44,6 +47,8 @@ namespace ProScore.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateEvent(int id, Event updatedEvent)
         {
+            if (updatedEvent == null) return BadRequest("Dados atualizados do evento são inválidos.");
+
             var success = _eventService.UpdateEvent(id, updatedEvent);
             if (!success) return NotFound("Evento não encontrado.");
             return NoContent();
