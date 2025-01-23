@@ -4,6 +4,7 @@ using ProScore.Api.Models;
 using ProScore.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using FluentAssertions;
 
 namespace ProScore.Tests.Services
 {
@@ -23,7 +24,8 @@ namespace ProScore.Tests.Services
         public void GetAllTeams_ShouldReturnEmptyList_WhenNoTeamsExist()
         {
             // Arrange
-            _mockContext.Setup(c => c.Teams).ReturnsDbSet(new List<Team>());
+            var mockDbSet = new Mock<DbSet<Team>>().ReturnsDbSet(new List<Team>());
+            _mockContext.Setup(c => c.Teams).Returns(mockDbSet.Object);
 
             // Act
             var result = _teamService.GetAllTeams();

@@ -23,7 +23,8 @@ namespace ProScore.Tests.Services
         public void GetEventsByMatch_ShouldReturnEmptyList_WhenNoEventsExist()
         {
             // Arrange
-            _mockContext.Setup(c => c.Events).ReturnsDbSet(new List<Event>());
+            var mockDbSet = new Mock<DbSet<Event>>().ReturnsDbSet(new List<Event>());
+            _mockContext.Setup(c => c.Events).Returns(mockDbSet.Object);
 
             // Act
             var result = _eventService.GetEventsByMatch(1);
@@ -38,7 +39,7 @@ namespace ProScore.Tests.Services
             // Arrange
             var gameEvent = new Event { MatchId = 1, PlayerId = 1 };
 
-            _mockContext.Setup(c => c.Matches.Find(1)).Returns((Match?)null);
+            _mockContext.Setup(c => c.Matches.Find(1)).Returns((ProScore.Api.Models.Match?)null);
 
             // Act
             var action = () => _eventService.CreateEvent(gameEvent);
@@ -52,7 +53,7 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var gameEvent = new Event { MatchId = 1, PlayerId = 1 };
-            _mockContext.Setup(c => c.Matches.Find(1)).Returns(new Match { Id = 1 });
+            _mockContext.Setup(c => c.Matches.Find(1)).Returns(new ProScore.Api.Models.Match { Id = 1 });
             _mockContext.Setup(c => c.Players.Find(1)).Returns(new Player { Id = 1 });
 
             // Act

@@ -24,7 +24,8 @@ namespace ProScore.Tests.Services
         public void GetAllPlayers_ShouldReturnEmptyList_WhenNoPlayersExist()
         {
             // Arrange
-            _mockContext.Setup(c => c.Players).ReturnsDbSet(new List<Player>());
+            var mockDbSet = new Mock<DbSet<Player>>().ReturnsDbSet(new List<Player>());
+            _mockContext.Setup(c => c.Players).Returns(mockDbSet.Object);
 
             // Act
             var result = _playerService.GetAllPlayers();
@@ -38,7 +39,8 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var player = new Player { Id = 1, Name = "Gabriel Barbosa", TeamId = 1 };
-            _mockContext.Setup(c => c.Players).ReturnsDbSet(new List<Player> { player });
+            var mockDbSet = new Mock<DbSet<Player>>().ReturnsDbSet(new List<Player> { player });
+            _mockContext.Setup(c => c.Players).Returns(mockDbSet.Object);
 
             // Act
             var result = _playerService.GetPlayerById(1);
