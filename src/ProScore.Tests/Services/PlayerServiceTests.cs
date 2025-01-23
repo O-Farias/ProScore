@@ -15,7 +15,6 @@ namespace ProScore.Tests.Services
 
         public PlayerServiceTests()
         {
-            // Configura um mock do DbContext
             _mockContext = new Mock<ProScoreContext>(new DbContextOptions<ProScoreContext>());
             _playerService = new PlayerService(_mockContext.Object);
         }
@@ -24,8 +23,9 @@ namespace ProScore.Tests.Services
         public void GetAllPlayers_ShouldReturnEmptyList_WhenNoPlayersExist()
         {
             // Arrange
-            var mockDbSet = new Mock<DbSet<Player>>().ReturnsDbSet(new List<Player>());
-            _mockContext.Setup(c => c.Players).Returns(mockDbSet.Object);
+            var mockPlayers = new Mock<DbSet<Player>>();
+            mockPlayers.SetupDbSet(new List<Player>());
+            _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
 
             // Act
             var result = _playerService.GetAllPlayers();
@@ -39,8 +39,9 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var player = new Player { Id = 1, Name = "Gabriel Barbosa", TeamId = 1 };
-            var mockDbSet = new Mock<DbSet<Player>>().ReturnsDbSet(new List<Player> { player });
-            _mockContext.Setup(c => c.Players).Returns(mockDbSet.Object);
+            var mockPlayers = new Mock<DbSet<Player>>();
+            mockPlayers.SetupDbSet(new List<Player> { player });
+            _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
 
             // Act
             var result = _playerService.GetPlayerById(1);
@@ -55,7 +56,13 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var player = new Player { Name = "Gabriel Barbosa", TeamId = 1 };
-            _mockContext.Setup(c => c.Teams.Find(1)).Returns(new Team { Id = 1, Name = "Flamengo" });
+            var mockTeams = new Mock<DbSet<Team>>();
+            mockTeams.SetupDbSet(new List<Team> { new Team { Id = 1, Name = "Flamengo" } });
+            _mockContext.Setup(c => c.Teams).Returns(mockTeams.Object);
+
+            var mockPlayers = new Mock<DbSet<Player>>();
+            mockPlayers.SetupDbSet(new List<Player>());
+            _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
 
             // Act
             var result = _playerService.CreatePlayer(player);
@@ -71,7 +78,9 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var player = new Player { Id = 1, Name = "Gabriel Barbosa", TeamId = 1 };
-            _mockContext.Setup(c => c.Players.Find(1)).Returns(player);
+            var mockPlayers = new Mock<DbSet<Player>>();
+            mockPlayers.SetupDbSet(new List<Player> { player });
+            _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
 
             var updatedPlayer = new Player { Name = "Gabi Gol", TeamId = 2 };
 
@@ -90,7 +99,9 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var player = new Player { Id = 1, Name = "Gabriel Barbosa", TeamId = 1 };
-            _mockContext.Setup(c => c.Players.Find(1)).Returns(player);
+            var mockPlayers = new Mock<DbSet<Player>>();
+            mockPlayers.SetupDbSet(new List<Player> { player });
+            _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
 
             // Act
             var result = _playerService.DeletePlayer(1);
