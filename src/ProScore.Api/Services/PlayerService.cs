@@ -1,5 +1,6 @@
 using ProScore.Api.Data;
 using ProScore.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Services
 {
