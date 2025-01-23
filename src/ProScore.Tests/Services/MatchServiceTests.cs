@@ -23,8 +23,9 @@ namespace ProScore.Tests.Services
         public void GetAllMatches_ShouldReturnEmptyList_WhenNoMatchesExist()
         {
             // Arrange
-            var mockDbSet = new Mock<DbSet<ProScore.Api.Models.Match>>().ReturnsDbSet(new List<ProScore.Api.Models.Match>());
-            _mockContext.Setup(c => c.Matches).Returns(mockDbSet.Object);
+            var mockMatches = new Mock<DbSet<Match>>();
+            mockMatches.SetupDbSet(new List<Match>());
+            _mockContext.Setup(c => c.Matches).Returns(mockMatches.Object);
 
             // Act
             var result = _matchService.GetAllMatches();
@@ -37,10 +38,11 @@ namespace ProScore.Tests.Services
         public void CreateMatch_ShouldThrowException_WhenTeamsDoNotExist()
         {
             // Arrange
-            var match = new ProScore.Api.Models.Match { HomeTeamId = 1, AwayTeamId = 2 };
+            var match = new Match { HomeTeamId = 1, AwayTeamId = 2 };
 
-            _mockContext.Setup(c => c.Teams.Find(1)).Returns((Team?)null);
-            _mockContext.Setup(c => c.Teams.Find(2)).Returns((Team?)null);
+            var mockTeams = new Mock<DbSet<Team>>();
+            mockTeams.SetupDbSet(new List<Team>());
+            _mockContext.Setup(c => c.Teams).Returns(mockTeams.Object);
 
             // Act
             var action = () => _matchService.CreateMatch(match);
@@ -53,15 +55,25 @@ namespace ProScore.Tests.Services
         public void CreateMatch_ShouldAddMatchToDatabase()
         {
             // Arrange
-            var match = new ProScore.Api.Models.Match { HomeTeamId = 1, AwayTeamId = 2 };
-            _mockContext.Setup(c => c.Teams.Find(1)).Returns(new Team { Id = 1, Name = "Time A" });
-            _mockContext.Setup(c => c.Teams.Find(2)).Returns(new Team { Id = 2, Name = "Time B" });
+            var match = new Match { HomeTeamId = 1, AwayTeamId = 2 };
+            var mockTeams = new Mock<DbSet<Team>>();
+            mockTeams.SetupDbSet(new List<Team>
+            {
+                new Team { Id = 1, Name = "Time A" },
+                new Team { Id = 2, Name = "Time B" }
+            });
+
+            var mockMatches = new Mock<DbSet<Match>>();
+            mockMatches.SetupDbSet(new List<Match>());
+
+            _mockContext.Setup(c => c.Teams).Returns(mockTeams.Object);
+            _mockContext.Setup(c => c.Matches).Returns(mockMatches.Object);
 
             // Act
             var result = _matchService.CreateMatch(match);
 
             // Assert
-            _mockContext.Verify(c => c.Matches.Add(It.IsAny<ProScore.Api.Models.Match>()), Times.Once);
+            _mockContext.Verify(c => c.Matches.Add(It.IsAny<Match>()), Times.Once);
             _mockContext.Verify(c => c.SaveChanges(), Times.Once);
             result.Should().Be(match);
         }
