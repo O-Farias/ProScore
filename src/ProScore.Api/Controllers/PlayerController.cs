@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProScore.Api.Data;
 using ProScore.Api.Models;
+using ProScore.Api.Services;
 
 namespace ProScore.Api.Controllers
 {
@@ -8,18 +8,18 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class PlayerController : ControllerBase
     {
-        private readonly ProScoreContext _context;
+        private readonly PlayerService _playerService;
 
-        public PlayerController(ProScoreContext context)
+        public PlayerController(PlayerService playerService)
         {
-            _context = context;
+            _playerService = playerService;
         }
 
         // GET: api/Player
         [HttpGet]
         public IActionResult GetAllPlayers()
         {
-            var players = _context.Players.ToList();
+            var players = _playerService.GetAllPlayers();
             return Ok(players);
         }
 
@@ -27,7 +27,7 @@ namespace ProScore.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetPlayerById(int id)
         {
-            var player = _context.Players.Find(id);
+            var player = _playerService.GetPlayerById(id);
             if (player == null) return NotFound("Jogador não encontrado.");
             return Ok(player);
         }
@@ -36,27 +36,23 @@ namespace ProScore.Api.Controllers
         [HttpPost]
         public IActionResult CreatePlayer(Player player)
         {
-            var team = _context.Teams.Find(player.TeamId);
-            if (team == null) return NotFound("Time não encontrado para associar o jogador.");
-
-            _context.Players.Add(player);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetPlayerById), new { id = player.Id }, player);
+            try
+            {
+                var createdPlayer = _playerService.CreatePlayer(player);
+                return CreatedAtAction(nameof(GetPlayerById), new { id = createdPlayer.Id }, createdPlayer);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT: api/Player/{id}
         [HttpPut("{id}")]
         public IActionResult UpdatePlayer(int id, Player updatedPlayer)
         {
-            var player = _context.Players.Find(id);
-            if (player == null) return NotFound("Jogador não encontrado.");
-
-            player.Name = updatedPlayer.Name;
-            player.Number = updatedPlayer.Number;
-            player.Position = updatedPlayer.Position;
-            player.TeamId = updatedPlayer.TeamId;
-
-            _context.SaveChanges();
+            var success = _playerService.UpdatePlayer(id, updatedPlayer);
+            if (!success) return NotFound("Jogador não encontrado.");
             return NoContent();
         }
 
@@ -64,11 +60,8 @@ namespace ProScore.Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeletePlayer(int id)
         {
-            var player = _context.Players.Find(id);
-            if (player == null) return NotFound("Jogador não encontrado.");
-
-            _context.Players.Remove(player);
-            _context.SaveChanges();
+            var success = _playerService.DeletePlayer(id);
+            if (!success) return NotFound("Jogador não encontrado.");
             return NoContent();
         }
     }
