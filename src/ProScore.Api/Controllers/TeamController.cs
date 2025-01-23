@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProScore.Api.Data;
 using ProScore.Api.Models;
+using ProScore.Api.Services;
 
 namespace ProScore.Api.Controllers
 {
@@ -8,63 +8,48 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class TeamController : ControllerBase
     {
-        private readonly ProScoreContext _context;
+        private readonly TeamService _teamService;
 
-        public TeamController(ProScoreContext context)
+        public TeamController(TeamService teamService)
         {
-            _context = context;
+            _teamService = teamService;
         }
 
-        // GET: api/Team
         [HttpGet]
         public IActionResult GetAllTeams()
         {
-            var teams = _context.Teams.ToList();
+            var teams = _teamService.GetAllTeams();
             return Ok(teams);
         }
 
-        // GET: api/Team/{id}
         [HttpGet("{id}")]
         public IActionResult GetTeamById(int id)
         {
-            var team = _context.Teams.Find(id);
+            var team = _teamService.GetTeamById(id);
             if (team == null) return NotFound("Time não encontrado.");
             return Ok(team);
         }
 
-        // POST: api/Team
         [HttpPost]
         public IActionResult CreateTeam(Team team)
         {
-            _context.Teams.Add(team);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetTeamById), new { id = team.Id }, team);
+            var createdTeam = _teamService.CreateTeam(team);
+            return CreatedAtAction(nameof(GetTeamById), new { id = createdTeam.Id }, createdTeam);
         }
 
-        // PUT: api/Team/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateTeam(int id, Team updatedTeam)
         {
-            var team = _context.Teams.Find(id);
-            if (team == null) return NotFound("Time não encontrado.");
-
-            team.Name = updatedTeam.Name;
-            team.Country = updatedTeam.Country;
-            team.Founded = updatedTeam.Founded;
-
-            _context.SaveChanges();
+            var success = _teamService.UpdateTeam(id, updatedTeam);
+            if (!success) return NotFound("Time não encontrado.");
             return NoContent();
         }
 
-        // DELETE: api/Team/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteTeam(int id)
         {
-            var team = _context.Teams.Find(id);
-            if (team == null) return NotFound("Time não encontrado.");
-
-            _context.Teams.Remove(team);
-            _context.SaveChanges();
+            var success = _teamService.DeleteTeam(id);
+            if (!success) return NotFound("Time não encontrado.");
             return NoContent();
         }
     }
