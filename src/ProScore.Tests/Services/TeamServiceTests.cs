@@ -24,7 +24,8 @@ namespace ProScore.Tests.Services
         public void GetAllTeams_ShouldReturnEmptyList_WhenNoTeamsExist()
         {
             // Arrange
-            var mockDbSet = new Mock<DbSet<Team>>().ReturnsDbSet(new List<Team>());
+            var mockDbSet = new Mock<DbSet<Team>>();
+            mockDbSet.SetupDbSet(new List<Team>()); 
             _mockContext.Setup(c => c.Teams).Returns(mockDbSet.Object);
 
             // Act
@@ -39,6 +40,9 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var newTeam = new Team { Name = "Flamengo", Country = "Brasil", Founded = new DateTime(1895, 11, 17) };
+            var mockDbSet = new Mock<DbSet<Team>>();
+            mockDbSet.SetupDbSet(new List<Team>());
+            _mockContext.Setup(c => c.Teams).Returns(mockDbSet.Object);
 
             // Act
             var result = _teamService.CreateTeam(newTeam);
