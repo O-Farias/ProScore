@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using ProScore.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,7 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure Entity Framework Core with SQL Server
-builder.Services.AddDbContext<ProScore.Api.Data.ProScoreContext>(options =>
+builder.Services.AddDbContext<ProScoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add controllers support
