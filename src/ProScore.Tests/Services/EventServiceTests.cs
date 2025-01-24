@@ -1,10 +1,10 @@
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using ProScore.Api.Data;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
-using FluentAssertions;
 
 namespace ProScore.Tests.Services
 {
@@ -23,8 +23,9 @@ namespace ProScore.Tests.Services
         public void GetEventsByMatch_ShouldReturnEmptyList_WhenNoEventsExist()
         {
             // Arrange
+            var events = new List<Event>();
             var mockEvents = new Mock<DbSet<Event>>();
-            mockEvents.SetupDbSet(new List<Event>());
+            mockEvents.SetupDbSet(events);
             _mockContext.Setup(c => c.Events).Returns(mockEvents.Object);
 
             // Act
@@ -39,9 +40,10 @@ namespace ProScore.Tests.Services
         {
             // Arrange
             var gameEvent = new Event { MatchId = 1, PlayerId = 1 };
-            var mockMatches = new Mock<DbSet<Match>>();
-            mockMatches.SetupDbSet(new List<Match>());
-
+            var mockMatches = new Mock<DbSet<ProScore.Api.Models.Match>>();
+            var matches = new List<ProScore.Api.Models.Match>();
+            mockMatches.SetupDbSet(matches);
+            mockMatches.Setup(d => d.Find(It.Is<object[]>(o => (int)o[0] == 1))).Returns((ProScore.Api.Models.Match)null);
             _mockContext.Setup(c => c.Matches).Returns(mockMatches.Object);
 
             // Act
@@ -55,27 +57,38 @@ namespace ProScore.Tests.Services
         public void CreateEvent_ShouldAddEventToDatabase()
         {
             // Arrange
+            var match = new ProScore.Api.Models.Match { Id = 1 };
+            var player = new Player { Id = 1 };
             var gameEvent = new Event { MatchId = 1, PlayerId = 1 };
-            var mockMatches = new Mock<DbSet<Match>>();
-            mockMatches.SetupDbSet(new List<Match> { new Match { Id = 1 } });
 
-            var mockPlayers = new Mock<DbSet<Player>>();
-            mockPlayers.SetupDbSet(new List<Player> { new Player { Id = 1 } });
-
-            var mockEvents = new Mock<DbSet<Event>>();
-            mockEvents.SetupDbSet(new List<Event>());
-
+            // Setup match mock
+            var mockMatches = new Mock<DbSet<ProScore.Api.Models.Match>>();
+            var matches = new List<ProScore.Api.Models.Match> { match };
+            mockMatches.SetupDbSet(matches);
+            mockMatches.Setup(d => d.Find(It.Is<object[]>(o => (int)o[0] == 1))).Returns(match);
             _mockContext.Setup(c => c.Matches).Returns(mockMatches.Object);
+
+            // Setup player mock
+            var mockPlayers = new Mock<DbSet<Player>>();
+            var players = new List<Player> { player };
+            mockPlayers.SetupDbSet(players);
+            mockPlayers.Setup(d => d.Find(It.Is<object[]>(o => (int)o[0] == 1))).Returns(player);
             _mockContext.Setup(c => c.Players).Returns(mockPlayers.Object);
+
+            // Setup events mock
+            var mockEvents = new Mock<DbSet<Event>>();
+            var events = new List<Event>();
+            mockEvents.SetupDbSet(events);
             _mockContext.Setup(c => c.Events).Returns(mockEvents.Object);
 
             // Act
             var result = _eventService.CreateEvent(gameEvent);
 
             // Assert
+            result.Should().NotBeNull();
+            result.Should().Be(gameEvent);
             _mockContext.Verify(c => c.Events.Add(It.IsAny<Event>()), Times.Once);
             _mockContext.Verify(c => c.SaveChanges(), Times.Once);
-            result.Should().Be(gameEvent);
         }
     }
 }
