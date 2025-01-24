@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Controllers
 {
@@ -9,9 +8,9 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class TeamController : ControllerBase
     {
-        private readonly TeamService _teamService;
+        private readonly ITeamService _teamService;
 
-        public TeamController(TeamService teamService)
+        public TeamController(ITeamService teamService)
         {
             _teamService = teamService;
         }
