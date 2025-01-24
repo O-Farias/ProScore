@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
 
@@ -9,33 +8,29 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class EventController : ControllerBase
     {
-        private readonly EventService _eventService;
+        private readonly IEventService _eventService;
 
-        public EventController(EventService eventService)
+        public EventController(IEventService eventService)
         {
             _eventService = eventService;
         }
 
-        // GET: api/Event/{matchId}
-        [HttpGet("{matchId}")]
+        [HttpGet("match/{matchId}")]
         public IActionResult GetEventsByMatch(int matchId)
         {
             var events = _eventService.GetEventsByMatch(matchId);
-
-            if (events == null || !events.Any()) return NotFound("Nenhum evento encontrado para esta partida.");
+            if (!events.Any()) return NotFound("Nenhum evento encontrado para esta partida.");
             return Ok(events);
         }
 
-        // POST: api/Event
         [HttpPost]
         public IActionResult CreateEvent(Event gameEvent)
         {
             try
             {
-                if (gameEvent == null) return BadRequest("Dados do evento são inválidos.");
-
                 var createdEvent = _eventService.CreateEvent(gameEvent);
-                return CreatedAtAction(nameof(GetEventsByMatch), new { matchId = createdEvent.MatchId }, createdEvent);
+                return CreatedAtAction(nameof(GetEventsByMatch),
+                    new { matchId = createdEvent.MatchId }, createdEvent);
             }
             catch (Exception ex)
             {
@@ -43,18 +38,14 @@ namespace ProScore.Api.Controllers
             }
         }
 
-        // PUT: api/Event/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateEvent(int id, Event updatedEvent)
+        public IActionResult UpdateEvent(int id, Event gameEvent)
         {
-            if (updatedEvent == null) return BadRequest("Dados atualizados do evento são inválidos.");
-
-            var success = _eventService.UpdateEvent(id, updatedEvent);
+            var success = _eventService.UpdateEvent(id, gameEvent);
             if (!success) return NotFound("Evento não encontrado.");
             return NoContent();
         }
 
-        // DELETE: api/Event/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteEvent(int id)
         {
