@@ -7,7 +7,7 @@ namespace ProScore.Tests
 {
     public static class DbSetMockExtensions
     {
-        public static Mock<DbSet<T>> ReturnsDbSet<T>(this Mock<DbSet<T>> mockSet, List<T> sourceList) where T : class
+        public static Mock<DbSet<T>> SetupDbSet<T>(this Mock<DbSet<T>> mockSet, List<T> sourceList) where T : class
         {
             var queryable = sourceList.AsQueryable();
 
