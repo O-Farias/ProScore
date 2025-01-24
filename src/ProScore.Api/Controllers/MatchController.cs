@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Controllers
 {
@@ -9,23 +8,21 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class MatchController : ControllerBase
     {
-        private readonly MatchService _matchService;
+        private readonly IMatchService _matchService;
 
-        public MatchController(MatchService matchService)
+        public MatchController(IMatchService matchService)
         {
             _matchService = matchService;
         }
 
-        // GET: api/Match
         [HttpGet]
         public IActionResult GetAllMatches()
         {
             var matches = _matchService.GetAllMatches();
-            if (matches == null || !matches.Any()) return NotFound("Nenhuma partida encontrada.");
+            if (!matches.Any()) return NotFound("Nenhuma partida encontrada.");
             return Ok(matches);
         }
 
-        // GET: api/Match/{id}
         [HttpGet("{id}")]
         public IActionResult GetMatchById(int id)
         {
@@ -34,14 +31,11 @@ namespace ProScore.Api.Controllers
             return Ok(match);
         }
 
-        // POST: api/Match
         [HttpPost]
         public IActionResult CreateMatch(Match match)
         {
             try
             {
-                if (match == null) return BadRequest("Dados da partida são inválidos.");
-
                 var createdMatch = _matchService.CreateMatch(match);
                 return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.Id }, createdMatch);
             }
@@ -51,18 +45,14 @@ namespace ProScore.Api.Controllers
             }
         }
 
-        // PUT: api/Match/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateMatch(int id, Match updatedMatch)
+        public IActionResult UpdateMatch(int id, Match match)
         {
-            if (updatedMatch == null) return BadRequest("Dados atualizados da partida são inválidos.");
-
-            var success = _matchService.UpdateMatch(id, updatedMatch);
+            var success = _matchService.UpdateMatch(id, match);
             if (!success) return NotFound("Partida não encontrada.");
             return NoContent();
         }
 
-        // DELETE: api/Match/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteMatch(int id)
         {
