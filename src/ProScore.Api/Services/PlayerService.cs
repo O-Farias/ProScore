@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Services
 {
-    public class PlayerService
+    public class PlayerService : IPlayerService
     {
         private readonly ProScoreContext _context;
 
