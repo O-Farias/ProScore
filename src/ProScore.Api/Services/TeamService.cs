@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Services
 {
-    public class TeamService
+    public class TeamService : ITeamService
     {
         private readonly ProScoreContext _context;
 
@@ -18,7 +18,7 @@ namespace ProScore.Api.Services
             return _context.Teams.ToList();
         }
 
-        public Team? GetTeamById(int id)
+        public Team GetTeamById(int id)
         {
             return _context.Teams.Find(id);
         }
