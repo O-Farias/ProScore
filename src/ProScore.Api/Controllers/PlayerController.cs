@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProScore.Api.Models;
 using ProScore.Api.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace ProScore.Api.Controllers
 {
@@ -9,14 +8,13 @@ namespace ProScore.Api.Controllers
     [Route("api/[controller]")]
     public class PlayerController : ControllerBase
     {
-        private readonly PlayerService _playerService;
+        private readonly IPlayerService _playerService;
 
-        public PlayerController(PlayerService playerService)
+        public PlayerController(IPlayerService playerService)
         {
             _playerService = playerService;
         }
 
-        // GET: api/Player
         [HttpGet]
         public IActionResult GetAllPlayers()
         {
@@ -24,7 +22,6 @@ namespace ProScore.Api.Controllers
             return Ok(players);
         }
 
-        // GET: api/Player/{id}
         [HttpGet("{id}")]
         public IActionResult GetPlayerById(int id)
         {
@@ -33,7 +30,6 @@ namespace ProScore.Api.Controllers
             return Ok(player);
         }
 
-        // POST: api/Player
         [HttpPost]
         public IActionResult CreatePlayer(Player player)
         {
@@ -48,7 +44,6 @@ namespace ProScore.Api.Controllers
             }
         }
 
-        // PUT: api/Player/{id}
         [HttpPut("{id}")]
         public IActionResult UpdatePlayer(int id, Player updatedPlayer)
         {
@@ -57,7 +52,6 @@ namespace ProScore.Api.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Player/{id}
         [HttpDelete("{id}")]
         public IActionResult DeletePlayer(int id)
         {
